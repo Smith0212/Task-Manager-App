@@ -1,70 +1,58 @@
 const Task = require("../Models/task")
+const asyncWrapper = require("../middleware/async")  // use to avoid the try catch block in every function
+const { createCustomError } = require("../errors/custom-error")
 
 
-const getAllTasks = async (req, res) => {
-    try {
+const getAllTasks = asyncWrapper(async (req, res) => {
+
         const tasks = await Task.find({})
-        // console.log(tasks)
         res.status(200).json({ tasks })
-    }
-    catch (err) {
-        res.status(500).json({ msg: err })
-    }
-}
+    
+})
 
-const createTask = async (req, res) => {
-    try {
+const createTask = asyncWrapper(async (req, res) => {
+
         const task = await Task.create(req.body)
-        // console.log(task)
         res.status(201).json({ task })
-    }
-    catch (err) {
-        res.status(500).json({ msg: err })
-    }
-}
+    
+})
 
-const getTask = async (req, res) => {
-    try {
+const getTask = asyncWrapper(async (req, res ,next) => {
+    
         const { id: taskID } = req.params
         const task = await Task.findOne({ _id: taskID })
-        if (!task) {
-            return res.status(404).json({ msg: `No Task with ID ${taskID}` }) // this msg will display when syntext of id is correct but not matching the value
-        }
+        console.log(!task)
+        if (!task) {  
+            console.log("hello")                                                             // this next function is handover the control to middleware "error-handler.js"
+            return next(createCustomError(`No Task with ID ${taskID}`, 404));   // handle error using custom error class (custom-error.js) 
+                                                                                // "this msg will display when syntext of id is correct but not matching the value"
+        }                                                                      
         res.status(201).json({ task })
-    }
-    catch (err) {
-        res.status(500).json({ msg: err }) // this msg will display when syntext of id is wrong(amount of char in id is not match)
-    }
-}
 
-const updateTask = async (req, res) => {
-    try {
+})
+
+const updateTask = asyncWrapper(async (req, res, next) => {
+
         const { id: taskID } = req.params
         const task = await Task.findOneAndUpdate({ _id: taskID }, req.body, { new: true, runValidators: true }) //"new" : will return edited(updated) value to the task varable
-        if (!task) {                                                                                      //"runValidators" : will run all the valodation on updated data                     
-            return res.status(404).json({ msg: `No Task with ID ${taskID}` }) 
-        }  
-        res.status(200).json({ task })                                                                                            
-    }
-    catch (err) {
-        res.status(500).json({ msg: err })
-    }                                                                                                 
-}
+        if (!task) {                                                                                            //"runValidators" : will run all the valodation on updated data                     
+            return next(createCustomError(`No Task with ID ${taskID}`, 404))   // handle error using custom error class (custom-error.js) 
+        }                                                                      // this next function is handover the control to middleware "error-handler.js" 
+        res.status(200).json({ task })  
+
+})
 
 
-const deleteTask = async (req, res) => {
-    try {
+const deleteTask = asyncWrapper(async (req, res, next) => {
+
         const { id: taskID } = req.params
         const task = await Task.findOneAndDelete({ _id: taskID })
         if (!task) {
-            return res.status(404).json({ msg: `No Task with ID ${taskID}` })
-        }
+            return next(createCustomError(`No Task with ID ${taskID}`, 404))  // handle error using custom error class (custom-error.js) 
+        }                                                                     // this next function is handover the control to middleware "error-handler.js"
         res.status(200).json({ task })
-    }
-    catch (err) {
-        res.status(500).json({ msg: err })
-    }
-}
+
+})
 
 
 

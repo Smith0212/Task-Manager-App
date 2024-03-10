@@ -4,7 +4,7 @@ const tasks = require('./routers/tasks')
 const connectDB = require("./db/connect")
 require("dotenv").config()
 const notFound = require("./middleware/not-found")
-
+const errorHandlerMW = require("./middleware/error-handler")
 
 // middelware
 app.use(express.static("./public")) //this static method of express is taking path of folder (containing all the file we want to send to the browser)
@@ -12,11 +12,11 @@ app.use(express.json())  // to having data in req.body in json form
 
 //route
 app.use('/api/v1/tasks', tasks)
-
-
 app.use(notFound)
+app.use(errorHandlerMW)
 
-const port = 3000;
+
+const port = process.env.PORT || 3000;
 // first we are connecting to DB after than our server start listening
 // connectDB will return promise so we can use "async"
 const start = async () => {

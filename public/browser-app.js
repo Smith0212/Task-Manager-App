@@ -1,15 +1,15 @@
-const tasksDOM = document.querySelector('.tasks')
-const loadingDOM = document.querySelector('.loading-text')
 const formDOM = document.querySelector('.task-form')
 const taskInputDOM = document.querySelector('.task-input')
 const formAlertDOM = document.querySelector('.form-alert')
+const loadingDOM = document.querySelector('.loading-text')
+const tasksDOM = document.querySelector('.tasks')
 
 // Load tasks from /api/tasks
 const showTasks = async () => {
   loadingDOM.style.visibility = 'visible'
   try {
     const {
-      data: { tasks },
+      data: { tasks },    //tasks is list of task obj
     } = await axios.get('/api/v1/tasks')
     if (tasks.length < 1) {
       tasksDOM.innerHTML = '<h5 class="empty-list">No tasks in your list</h5>'
@@ -19,21 +19,22 @@ const showTasks = async () => {
     const allTasks = tasks
       .map((task) => {
         const { completed, _id: taskID, name } = task
-        return `<div class="single-task ${completed && 'task-completed'}">
-<h5><span><i class="far fa-check-circle"></i></span>${name}</h5>
-<div class="task-links">
+        return `
+        
+<div class="single-task ${completed && 'task-completed'}">
+  <h5><span><i class="far fa-check-circle"></i></span>${name}</h5>
+  <div class="task-links">
 
+    <!-- edit link -->
+    <a href="task.html?id=${taskID}"  class="edit-link">
+      <i class="fas fa-edit"></i>
+    </a>
 
-
-<!-- edit link -->
-<a href="task.html?id=${taskID}"  class="edit-link">
-<i class="fas fa-edit"></i>
-</a>
-<!-- delete btn -->
-<button type="button" class="delete-btn" data-id="${taskID}">
-<i class="fas fa-trash"></i>
-</button>
-</div>
+    <!-- delete btn -->
+    <button type="button" class="delete-btn" data-id="${taskID}">
+      <i class="fas fa-trash"></i>
+    </button>
+  </div>
 </div>`
       })
       .join('')
@@ -65,9 +66,8 @@ tasksDOM.addEventListener('click', async (e) => {
 })
 
 // form
-
 formDOM.addEventListener('submit', async (e) => {
-  e.preventDefault()
+  e.preventDefault()   //priventing from page reload when task is submited
   const name = taskInputDOM.value
 
   try {
